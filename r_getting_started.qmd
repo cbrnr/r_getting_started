@@ -1,0 +1,324 @@
+---
+title: "Getting started with R and RStudio"
+author: "Clemens Brunner"
+format:
+  revealjs:
+    echo: true
+    menu: false
+    header-includes: |
+      <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" rel="stylesheet"/>
+    footer: |
+      [<i class="fa-solid fa-envelope"></i>](mailto:clemens.brunner@gmail.com)
+      [<i class="fa-brands fa-chrome"></i>](https://cbrnr.github.io/about/)
+      [<i class="fa-brands fa-twitter"></i>](https://twitter.com/cbrnr_)
+      [<i class="fa-brands fa-github"></i>](https://github.com/cbrnr)
+---
+
+## Contents
+
+-   Installing R and RStudio
+-   Importing data
+-   Vectors and data frames
+-   Data wrangling
+-   *t*-test
+-   Linear regression
+-   Analysis of variance
+
+## Why R?
+
+-   R enables reproducible analyses because:
+-   R is free, cross-platform, and open-source
+-   R works with text commands (no clicking around in dozens of dialogs)
+-   Text commands can be permanently stored in a text file
+-   This text file (R script) can be run over and over and always reproduces the same results
+-   R is the de-facto standard for statistical data analysis
+-   R has a large and friendly community
+
+## Installing R and RStudio
+
+-   R is a statistical programming environment
+    -   Full-fledged programming language
+    -   Tailored towards data analysis and statistics
+-   RStudio is a GUI (graphical user interface)
+    -   Completely optional
+    -   Makes using R easier
+-   Download R from <https://www.r-project.org/>
+-   Download RStudio from <https://www.rstudio.com/products/rstudio/download/>
+
+## RStudio components
+
+::: columns
+::: {.column width="70%"}
+![](rstudio.png)
+:::
+
+::: {.column width="30%"}
+1.  Console
+2.  Editor
+3.  Environment, History
+4.  Files, Plots, Packages, Help
+:::
+:::
+
+## Installing packages
+-   Packages extend the functionality of R
+-   The [Tidyverse](https://www.tidyverse.org/) is a collection of packages that work together
+
+> Although almost anything can be done with "base R" (no additional packages), most tasks are easier and more convenient with the Tidyverse! --- *(my opinion)*
+
+-   The `tidyverse` meta-package provides all core packages
+-   Let's install it (using the RStudio "Packages" tab)!
+
+## Where do I put my code?
+
+-   R runs *only* in the console
+-   This is where we enter commands and R will run them
+-   We permanently store R commands in a text file
+-   This is called an R script (file extension `.R`)
+-   Reproducible (same result every time we run the script)
+-   Comments are introduced with `#`
+
+## Integrated help
+
+-   In the console, type `?` followed by a function name
+-   This will open the integrated help browser
+-   Always read the documentation if you use a function for the first time!
+
+```{r}
+#| eval: false
+?mean  # shows help for the mean function
+```
+
+## Importing data
+
+-   Let's import an existing data set!
+-   We need the `readr` package (which is part of `tidyverse`)
+-   To use a package, we have to activate it first with the `library()` function
+-   `library(tidyverse)` activates all Tidyverse packages
+-   `library(readr)` activates just the `readr` package:
+
+```{r}
+library(readr)
+```
+
+## Importing CSV files
+
+-   The function `read_delim()` imports data from text files
+-   It only needs the file name (in most cases)
+-   To import the file `lecturer.csv`:
+
+```{r}
+#| eval: false
+read_delim("lecturer.csv")
+```
+
+-   To use the imported data, we need to assign a name
+-   For example, the data from `lecturer.csv` will be available as `df` in this example:
+
+```{r}
+#| eval: false
+df = read_delim("lecturer.csv")
+```
+
+## More CSV examples
+
+```{r}
+#| eval: false
+read_delim("birds.csv")
+read_delim("lecturer.dat")
+read_delim("pm10.csv")
+read_delim("wahl16.csv")
+read_delim("homework.csv")  # temperature column not correct
+read_csv2("homework.csv")  # this works
+read_delim("cars.csv")  # error, need to set delimiter manually!
+read_delim("cars.csv", delim=",")
+read_csv2("covid19.csv")  # decimal mark ,
+```
+
+We can also generate import code semi-automatically:
+
+![](import.png)
+
+## Importing Excel files
+
+We need `read_excel()` from the `readxl` package:
+
+```{r}
+library(readxl)
+read_excel("lecturer.xlsx")
+```
+
+## Importing SPSS files
+
+We need `read_spss()` from the `haven` package:
+
+```{r}
+library(haven)
+read_spss("lecturer.sav")
+```
+
+## Vectors
+
+-   Imported data ends up in a so-called *data frame* (a table)
+-   The columns are *vectors*, the most basic data type in R
+-   A vector is a collection of values of a specific *type* (numeric, character, logical, ...)
+-   The `c()` function creates a vector:
+
+```{r}
+c(1, 8, -5, 17, 3)
+x = c(1, 8, -5, 17, 3)  # assign the name x
+length(x)  # number of elements
+```
+
+## Data frames
+
+-   A *data frame* is a table consisting of rows and columns
+-   Each column is a vector
+-   Different columns can have different types
+
+```{r}
+data.frame(a=-2:2, b=c("A", "B", "C", "D", "E"), c=10.1:14.1)
+```
+
+## Tibbles
+- A *tibble* is a data frame that "looks better"
+- It requires the `tibble` package (part of the Tidyverse)
+
+```{r}
+library(tibble)
+tibble(a=-2:2, b=c("A", "B", "C", "D", "E"), c=10.1:14.1)
+```
+
+## Data wrangling
+
+-   Manipulating a data frame is called data wrangling
+-   The `dplyr` package makes this task a lot of fun
+-   There are five basic data wrangling activities:
+    -   Filtering rows with `filter()`
+    -   Sorting rows with `arrange()`
+    -   Selecting columns with `select()`
+    -   Computing new columns with `mutate()`
+    -   Summarizing with `group_by()` and `summarize()`
+
+## Pipe operator
+
+-   The pipe operator `|>` can be used to pipe an expression on the left to a function on the right
+-   Instead of writing `mean(x)` we can write `x |> mean()`
+-   This is useful if we want to combine several processing steps in a pipeline
+
+```{r}
+y = 1:100
+log(mean(y))
+y |> mean() |> log()
+```
+
+
+## Example (1)
+
+-   Let's use the `penguins` data set from the `palmerpenguins` package
+
+```{r}
+library(dplyr)
+library(palmerpenguins)
+
+penguins |>
+    group_by(species) |>
+    mutate(mass=body_mass_g / 1000) |>
+    summarize(
+        mean_mass=mean(mass, na.rm=TRUE),
+        sd_mass=sd(mass, na.rm=TRUE)
+    )
+```
+
+## Example (2)
+
+-   The `ggplot2` package creates visualizations of the data
+
+```{r}
+library(ggplot2)
+df = penguins |> rename(length=bill_length_mm, depth=bill_depth_mm)
+ggplot(df, mapping=aes(x=length, y=depth)) +
+    geom_point() +
+    geom_smooth(method=lm)
+```
+
+## Example (3)
+
+```{r}
+ggplot(df, mapping=aes(x=length, y=depth, color=species)) +
+    geom_point() +
+    geom_smooth(method=lm)
+```
+
+## *t*-test (1)
+
+- The function `t.test()` performs (un)paired *t*-tests
+
+```{r}
+df = df |> filter(species %in% c("Adelie", "Chinstrap"))
+t.test(length ~ species, data=df)
+```
+
+## *t*-test (2)
+
+```{r}
+t.test(depth ~ species, data=df)
+```
+
+## Linear regression (1)
+
+-   The function `lm()` computes a linear regression model
+-   Model specification: `dv ~ iv1 + iv2 + ...`
+-   (Read: "`dv` is predicted by `iv1` and `iv2` and ...")
+
+```{r}
+model = lm(bill_depth_mm ~ bill_length_mm, data=penguins)
+```
+
+## Linear regression (2)
+
+```{r}
+summary(model)
+```
+
+## Linear regression (3)
+
+```{r}
+par(mfrow=c(2, 2))  # put 2 x 2 plots into one figure
+plot(model)  # creates 4 plots
+```
+
+## Analysis of variance
+
+-   ANOVA *is* linear regression
+-   Base R has functions for doing ANOVA (you could even use `lm()`), but these produce results that are slightly different from those obtained by e.g. SPSS
+-   The package `ez` generates output that is similar to SPSS
+
+## ANOVA example (1)
+
+```{r}
+library(ez)
+library(tidyr)  # for drop_na()
+
+df = drop_na(penguins)  # drop rows with missing data (NA)
+df$id = factor(1:nrow(df))  # add id column
+ezANOVA(df, dv=bill_depth_mm, wid=id, between=species)
+```
+
+## ANOVA example (2)
+
+```{r}
+pairwise.t.test(df$bill_depth_mm, df$species)
+```
+
+## Courses for beginners
+
+[Introduction to R](https://github.com/cbrnr/r_intro_short)
+
+[Data wrangling in R using the Tidyverse](https://github.com/cbrnr/r_tidyverse)
+
+## Book recommendations
+
+[Discovering Statistics using R](https://www.discoveringstatistics.com/books/discovering-statistics-using-r/)
+
+[Learning Statistics with R](https://learningstatisticswithr.com/)
